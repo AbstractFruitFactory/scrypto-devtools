@@ -1,7 +1,6 @@
 import { andThen, pipe } from "ramda";
-import { workspace } from "vscode";
-import { parseNewAccount, parseShowAccount, parseShowLedger } from "../parsers";
-import { newAccount, showAccount, showLedger } from "../resim-commands";
+import { parseNewAccount, parsePublishPackage, parseShowAccount, parseShowLedger } from "../parsers";
+import { newAccount, publishPackage, showAccount, showLedger } from "../resim-commands";
 import { execShell } from "./execute-shell";
 
 export const exec_createAccount = pipe(
@@ -24,4 +23,10 @@ export const exec_showAccount = pipe(
     showAccount,
     execShell,
     andThen(parseShowAccount)
+)
+
+export const exec_publishPackage = pipe(
+    publishPackage,
+    execShell,
+    andThen(parsePublishPackage)
 )

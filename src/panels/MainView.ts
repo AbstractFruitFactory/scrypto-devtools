@@ -75,6 +75,8 @@ export class MainView implements vscode.WebviewViewProvider {
     pipe(newSimpleBadge, execShell)()
   }
 
+  private async publishPackage() {
+    const { packageAddress } = await exec_publishPackage()
     this.store.packageAddress.set(packageAddress)
   }
 
@@ -100,6 +102,7 @@ export class MainView implements vscode.WebviewViewProvider {
       switch (message.type) {
         case 'create-account': this.createAccount(); return
         case 'create-badge': this.createBadge(); return
+        case 'publish-package': this.publishPackage(); return
       }
     })
   }

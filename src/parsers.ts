@@ -40,3 +40,7 @@ export const parseShowLedger = (output: string) => ({
         .split('Current Time: ')[1]
         .split('\n')[0]
 })
+
+export const parsePublishPackage = (output: string) => ({
+    packageAddress: output.match(/package_.*/)![0]
+})

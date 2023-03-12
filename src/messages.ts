@@ -17,9 +17,11 @@ export type CreateAccount = _Message<'create-account', {}>
 
 export type CreateBadge = _Message<'create-badge', {}>
 
+export type PublishPackage = _Message<'publish-package', {}>
+
 export type AccountCreated = _Message<'account-created', {
     account: AccountT
 }>
 
-export type MessageFromWebview = CreateAccount | CreateBadge
+export type MessageFromWebview = CreateAccount | CreateBadge | PublishPackage
 export type MessageToWebview = AccountCreated

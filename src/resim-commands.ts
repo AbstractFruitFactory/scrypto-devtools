@@ -7,3 +7,5 @@ export const setDefaultAccount = (accountAddress: string, privateKey: string) =>
 export const newSimpleBadge = () => `resim new-simple-badge`
 
 export const showLedger = () => `resim show-ledger`
+
+export const publishPackage = () => `resim publish-package .`
