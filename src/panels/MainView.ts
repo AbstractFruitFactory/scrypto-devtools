@@ -29,7 +29,6 @@ export class MainView implements vscode.WebviewViewProvider {
     //})
 
     this.files = findAllRustFiles(`${root}/${srcFolderName}`)
-    console.log(this.files)
   }
 
   private async addAccountToView(address: string) {
