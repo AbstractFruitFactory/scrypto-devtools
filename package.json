@@ -1,0 +1,88 @@
+{
+  "name": "hello-world-svelte",
+  "displayName": "hello-world-svelte",
+  "description": "A hello world sample extension to demonstrate using Svelte with the Webview UI Toolkit for VS Code.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.46.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:hello-world.showHelloWorld"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "scrypto-devtools",
+          "title": "Scrypto Devtools",
+          "icon": "resources/package-explorer.svg"
+        }
+      ]
+    },
+    "views": {
+      "scrypto-devtools": [
+        {
+          "type": "webview",
+          "id": "main",
+          "name": "Scrypto Devtools"
+        },
+        {
+          "id": "accounts",
+          "name": "Accounts"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "setDefaultAccount",
+        "title": "Set as default",
+        "icon": {
+          "light": "resources/active.svg",
+          "dark": "resources/active.svg"
+        }
+      }
+    ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "setDefaultAccount",
+          "when": "view == accounts && viewItem == account",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "install:all": "npm install && cd webview-ui && npm install",
+    "build": "yarn build:webview && yarn compile",
+    "start:webview": "cd webview-ui && npm run dev",
+    "build:webview": "cd webview-ui && npm run build",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.46.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.19.0",
+    "glob": "^7.1.6",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.5.0"
+  },
+  "dependencies": {
+    "@ramda/pipe": "^0.26.1",
+    "@types/ramda": "^0.28.20",
+    "child_process": "^1.0.2",
+    "ramda": "^0.28.0"
+  }
+}
