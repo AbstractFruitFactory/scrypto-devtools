@@ -8,19 +8,20 @@ import { pipe } from "ramda";
 import { getAddressType } from "../utilities/address-type";
 import { exec_createAccount, exec_showAccount, exec_showLedger } from "../utilities/actions";
 import { findAllRustFiles } from "../utilities/find-files";
+import { store as _store } from '../persistent-state'
 
 export class MainView implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
-  private context: vscode.ExtensionContext;
+  private store: ReturnType<typeof _store>;
   private files: string[] = []
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly accounts: AccountsTreeView,
-    context: vscode.ExtensionContext,
+    globalState: vscode.ExtensionContext['globalState'],
     srcFolderName: string
   ) {
-    this.context = context
+    this.store = _store(globalState)
     this.loadDataFromLedger()
     const root = vscode.workspace.workspaceFolders![0].uri.fsPath
 
@@ -32,7 +33,7 @@ export class MainView implements vscode.WebviewViewProvider {
   }
 
   private async addAccountToView(address: string) {
-    const storedKeypair = this.context.globalState.get<{ publicKey: string, privateKey: string }>(address)
+    const storedKeypair = this.store.account.get(address)
 
     this.accounts.addAccount(
       {
@@ -66,12 +67,15 @@ export class MainView implements vscode.WebviewViewProvider {
 
   private async createAccount() {
     const account = await exec_createAccount()
-    this.context.globalState.update(account.address, { publicKey: account.publicKey, privateKey: account.privateKey })
+    this.store.account.set(account.address, { publicKey: account.publicKey, privateKey: account.privateKey })
     this.addAccountToView(account.address)
   }
 
   private async createBadge() {
     pipe(newSimpleBadge, execShell)()
+  }
+
+    this.store.packageAddress.set(packageAddress)
   }
 
   public resolveWebviewView(
