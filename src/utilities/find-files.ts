@@ -1,15 +1,14 @@
 import * as fs from 'fs'
 
-export const findAllRustFiles = (rootPath: string): string[] => searchFiles(rootPath, /.*.rs/)
+export const findAllRustFiles = (rootPath: string): string[] => searchFiles(rootPath, /.*\.rs/)
 
-const searchFiles = (dir: string, pattern: RegExp = /\.*/, filelist: string[] = []): string[] => {
+const searchFiles = (dir: string, pattern: RegExp, filelist: string[] = []): string[] => {
     let files = fs.readdirSync(dir)
     files.forEach(function (file: string) {
         const filePath: string = `${dir}/${file}`
         if (fs.statSync(filePath).isDirectory()) {
-            filelist = searchFiles(filePath, pattern, filelist)
-        }
-        else if (pattern.test(file)) {
+            searchFiles(filePath, pattern, filelist)
+        } else if (pattern.test(file)) {
             filelist.push(filePath)
         }
     })

@@ -17,7 +17,8 @@ export class MainView implements vscode.WebviewViewProvider {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly accounts: AccountsTreeView,
-    context: vscode.ExtensionContext
+    context: vscode.ExtensionContext,
+    srcFolderName: string
   ) {
     this.context = context
     this.loadDataFromLedger()
@@ -27,7 +28,7 @@ export class MainView implements vscode.WebviewViewProvider {
     //await this.updateBadges()
     //})
 
-    this.files = findAllRustFiles(root)
+    this.files = findAllRustFiles(`${root}/${srcFolderName}`)
     console.log(this.files)
   }
 
