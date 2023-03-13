@@ -6,30 +6,24 @@ import { AccountsTreeView } from "./AccountsTreeView";
 import { newSimpleBadge } from "../resim-commands";
 import { pipe } from "ramda";
 import { getAddressType } from "../utilities/address-type";
-import { exec_createAccount, exec_showAccount, exec_showLedger } from "../utilities/actions";
-import { findAllRustFiles } from "../utilities/find-files";
+import { exec_createAccount, exec_publishPackage, exec_showAccount, exec_showLedger } from "../utilities/actions";
 import { store as _store } from '../persistent-state'
+import { ProjectTreeView } from "./ProjectTreeView";
 
 export class MainView implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
-  private store: ReturnType<typeof _store>;
-  private files: string[] = []
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly accounts: AccountsTreeView,
-    globalState: vscode.ExtensionContext['globalState'],
-    srcFolderName: string
+    private readonly project: ProjectTreeView,
+    private readonly store: ReturnType<typeof _store>
   ) {
-    this.store = _store(globalState)
     this.loadDataFromLedger()
-    const root = vscode.workspace.workspaceFolders![0].uri.fsPath
 
     // vscode.workspace.createFileSystemWatcher('**/*.rs', false, false, false).onDidChange(async () => {
     //await this.updateBadges()
     //})
-
-    this.files = findAllRustFiles(`${root}/${srcFolderName}`)
   }
 
   private async addAccountToView(address: string) {
@@ -75,11 +69,6 @@ export class MainView implements vscode.WebviewViewProvider {
     pipe(newSimpleBadge, execShell)()
   }
 
-  private async publishPackage() {
-    const { packageAddress } = await exec_publishPackage()
-    this.store.packageAddress.set(packageAddress)
-  }
-
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext,
@@ -102,7 +91,6 @@ export class MainView implements vscode.WebviewViewProvider {
       switch (message.type) {
         case 'create-account': this.createAccount(); return
         case 'create-badge': this.createBadge(); return
-        case 'publish-package': this.publishPackage(); return
       }
     })
   }

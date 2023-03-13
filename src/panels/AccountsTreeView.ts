@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import { execShell } from '../utilities/execute-shell';
 import { setDefaultAccount } from '../resim-commands';
 import { AccountT, BlueprintT } from '../types';

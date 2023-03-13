@@ -8,4 +8,4 @@ export const newSimpleBadge = () => `resim new-simple-badge`
 
 export const showLedger = () => `resim show-ledger`
 
-export const publishPackage = () => `resim publish-package .`
+export const publishPackage = (dir: string) => `resim publish ${dir}`

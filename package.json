@@ -31,6 +31,10 @@
           "name": "Scrypto Devtools"
         },
         {
+          "id": "project",
+          "name": "Project"
+        },
+        {
           "id": "accounts",
           "name": "Accounts"
         }
@@ -44,6 +48,14 @@
           "light": "resources/active.svg",
           "dark": "resources/active.svg"
         }
+      },
+      {
+        "command": "publishPackage",
+        "title": "Publish Package",
+        "icon": {
+          "light": "resources/active.svg",
+          "dark": "resources/active.svg"
+        }
       }
     ],
     "menus": {
@@ -52,6 +64,13 @@
           "command": "setDefaultAccount",
           "when": "view == accounts && viewItem == account",
           "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "publishPackage",
+          "when": "view == project",
+          "group": "navigation"
         }
       ]
     }
