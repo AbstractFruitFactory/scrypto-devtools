@@ -1,13 +1,7 @@
 import { ExtensionContext } from "vscode";
 
 export const store = (store: ExtensionContext['globalState']) => ({
-    packageAddress: packageAddress(store),
     account: account(store)
-})
-
-const packageAddress = (store: ExtensionContext['globalState']) => ({
-    get: () => store.get<string>('packageAddress'),
-    set: (value: string) => store.update('packageAddress', value)
 })
 
 const account = (store: ExtensionContext['globalState']) => ({

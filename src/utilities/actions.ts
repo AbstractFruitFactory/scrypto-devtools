@@ -1,6 +1,6 @@
 import { andThen, pipe } from "ramda";
-import { parseNewAccount, parsePublishPackage, parseShowAccount, parseShowLedger } from "../parsers";
-import { newAccount, publishPackage, showAccount, showLedger } from "../resim-commands";
+import { parseNewAccount, parsePublishPackage, parseShowAccount, parseShowComponent, parseShowLedger } from "../parsers";
+import { callFunction, exportABI, newAccount, publishPackage, show, showLedger } from "../resim-commands";
 import { execShell } from "./execute-shell";
 
 export const exec_createAccount = pipe(
@@ -20,7 +20,7 @@ export const exec_showLedger = pipe(
 )
 
 export const exec_showAccount = pipe(
-    showAccount,
+    show,
     execShell,
     andThen(parseShowAccount)
 )
@@ -29,4 +29,20 @@ export const exec_publishPackage = pipe(
     publishPackage,
     execShell,
     andThen(parsePublishPackage)
+)
+
+export const exec_exportABI = pipe(
+    exportABI,
+    execShell
+)
+
+export const exec_callFunction = pipe(
+    callFunction,
+    execShell
+)
+
+export const exec_showComponent = pipe(
+    show,
+    execShell,
+    andThen(parseShowComponent)
 )

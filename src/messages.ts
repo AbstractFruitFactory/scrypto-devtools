@@ -1,4 +1,4 @@
-import type { AccountT } from "./types"
+import type { AccountT, BlueprintT } from "./types"
 
 type _Message<T extends string, C> = {
     type: T,
@@ -23,5 +23,9 @@ export type AccountCreated = _Message<'account-created', {
     account: AccountT
 }>
 
-export type MessageFromWebview = CreateAccount | CreateBadge | PublishPackage
+export type InstantiateBlueprint = _Message<'instantiate-blueprint', {
+    blueprint: BlueprintT
+}>
+
+export type MessageFromWebview = CreateAccount | CreateBadge | PublishPackage | InstantiateBlueprint
 export type MessageToWebview = AccountCreated

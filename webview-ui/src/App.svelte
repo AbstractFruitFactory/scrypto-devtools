@@ -1,6 +1,8 @@
 <script lang="ts">
   import { provideVSCodeDesignSystem, vsCodeButton } from "@vscode/webview-ui-toolkit";
-  import type { AccountT } from "../../src/types";
+  import type { BlueprintT, ComponentT, PackageT } from "../../src/types";
+  import ActionMenu from "./components/ActionMenu.svelte";
+  import Package from "./components/Package.svelte";
   import { postMessageToExtension } from "./utilities/postMessage";
 
   // In order to use the Webview UI Toolkit web components they
@@ -22,16 +24,57 @@
   //
   // provideVSCodeDesignSystem().register(allComponents.register());
 
-  function createAccount() {
+  let _package: PackageT;
+  let components: ComponentT[] = [];
+
+  const handlePackagePublished = (payload: PackageT) => {
+    _package = payload;
+  };
+
+  const handleComponentLoaded = (payload: ComponentT) => {
+    components = [...components, payload];
+  };
+
+  const handlePackageSelected = (payload: PackageT) => {
+    console.log("handlePackageSelected", payload)
+    _package = payload;
+  };
+
+  window.addEventListener("message", (event) => {
+    ({
+      "package-published": handlePackagePublished,
+      "component-loaded": handleComponentLoaded,
+      "package-selected": handlePackageSelected,
+    })[event.data.type](event.data.payload);
+  });
+
+  const createAccount = () => {
     postMessageToExtension({
       type: "create-account",
       content: {},
-    })
-  }
+    });
+  };
+
+  const publishPackage = () => {
+    postMessageToExtension({
+      type: "publish-package",
+      content: {},
+    });
+  };
+
+  const instantiateBlueprint = (blueprint: BlueprintT) => {
+    postMessageToExtension({
+      type: "instantiate-blueprint",
+      content: { blueprint },
+    });
+  };
 </script>
 
 <main>
-  <vscode-button on:click={createAccount}>Create account</vscode-button>
+  <ActionMenu on:create-account={createAccount} on:publish-package={publishPackage} />
+  {#if _package}
+    <Package on:instantiate-blueprint={(e) => instantiateBlueprint(e.detail)} {_package} {components} />
+  {/if}
 </main>
 
 <style>

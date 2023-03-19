@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
 import { execShell } from '../utilities/execute-shell';
 import { setDefaultAccount } from '../resim-commands';
-import { AccountT, BlueprintT } from '../types';
+import { AccountT } from '../types';
+import { store as _store } from '../persistent-state'
+import { exec_showAccount } from '../utilities/actions';
 
 type Element = Account | PublicKey | PrivateKey | PublicKeyValue | PrivateKeyValue | Blueprint | BlueprintNameValue | PackageAddressValue
 
@@ -11,7 +13,9 @@ export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
   private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>()
   readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event
 
-  constructor() { }
+  constructor(
+    private readonly store: ReturnType<typeof _store>,
+  ) { }
 
   public clear() {
     this.accounts = []
@@ -22,8 +26,17 @@ export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
     this._onDidChangeTreeData.fire(element);
   }
 
-  public addAccount(account: AccountT) {
-    this.accounts.push(account)
+  public async addAccount(address: string) {
+    const storedKeypair = this.store.account.get(address)
+
+    this.accounts.push(
+      {
+        address,
+        ...await exec_showAccount(address),
+        privateKey: storedKeypair?.privateKey ?? '<unavailable>',
+        publicKey: storedKeypair?.publicKey ?? '<unavailable>'
+      }
+    )
     this.refresh()
   }
 
@@ -78,7 +91,7 @@ export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
   }
 }
 
-class Account extends vscode.TreeItem {
+export class Account extends vscode.TreeItem {
   contextValue = 'account'
 
   constructor(
@@ -127,7 +140,7 @@ class PrivateKeyValue extends vscode.TreeItem {
 
 class Blueprint extends vscode.TreeItem {
   constructor(
-    public readonly blueprint: BlueprintT
+    public readonly blueprint: AccountT['blueprint']
   ) {
     super(`blueprint`, vscode.TreeItemCollapsibleState.Collapsed)
   }
@@ -135,7 +148,7 @@ class Blueprint extends vscode.TreeItem {
 
 class BlueprintName extends vscode.TreeItem {
   constructor(
-    public readonly blueprint: BlueprintT
+    public readonly blueprint: AccountT['blueprint']
   ) {
     super(`name`, vscode.TreeItemCollapsibleState.Collapsed);
   }
@@ -143,7 +156,7 @@ class BlueprintName extends vscode.TreeItem {
 
 class PackageAddress extends vscode.TreeItem {
   constructor(
-    public readonly blueprint: BlueprintT
+    public readonly blueprint: AccountT['blueprint']
   ) {
     super(`package_address`, vscode.TreeItemCollapsibleState.Collapsed);
   }
@@ -165,6 +178,7 @@ class PackageAddressValue extends vscode.TreeItem {
   }
 }
 
+/*
 vscode.commands.registerCommand("setDefaultAccount", (account: Account) => {
   execShell(setDefaultAccount(account.account.address, account.account.privateKey))
-})
+})*/

@@ -16,6 +16,13 @@ export const parseShowAccount = (output: string) => ({
     }
 })
 
+export const parseShowComponent = (output: string) => ({
+    blueprint: {
+        packageAddress: output.match(/package_sim.*,/)![0].replace(',', ''),
+        name: output.match(/blueprint_name:.*}/)![0].split(" ")[1].split(`"`)[1]
+    }
+})
+
 export const parseShowLedger = (output: string) => ({
     packages: output.substring(output.search('Packages'), output.search('Components'))
         .split('\n')
