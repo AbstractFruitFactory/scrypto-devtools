@@ -1,4 +1,99 @@
 import type { WebviewApi } from "vscode-webview";
+import type { ABI } from "../../../src/types";
+
+const mockABI: ABI = {
+  package_address: "rdx_simqsyqsyqsyqsyqsyqsyqsyqsyqsyqsyqsyqs",
+  blueprint_name: "blueprint1",
+  abi: {
+    structure: {
+      name: "mock_blueprint",
+      type: "struct",
+      fields: {
+        named: ["name"],
+        type: "string",
+      },
+    },
+    fns: [
+      {
+        ident: "mock_fn",
+        mutability: "Mutable",
+        input: {
+          type: "struct",
+          name: "name",
+          fields: {
+            named: [["arg0", { type: "string" }], ["arg1", { type: "uInt8" }]],
+          },
+        },
+        output: {
+          type: "string",
+        },
+        export_name: "export name",
+      },
+      {
+        ident: "instantiate_blueprint",
+        mutability: null,
+        input: {
+          type: "struct",
+          name: "name",
+          fields: {
+            named: [],
+          },
+        },
+        output: {
+          type: "string",
+        },
+        export_name: "export name",
+      },
+    ],
+  },
+};
+
+const mockABI2: ABI = {
+  package_address: "rdx_simqsyqsyqsyqsyqsyqsyqsyqsyqsyqsyqsyqs",
+  blueprint_name: "blueprint2",
+  abi: {
+    structure: {
+      name: "mock_blueprint",
+      type: "struct",
+      fields: {
+        named: ["name"],
+        type: "string",
+      },
+    },
+    fns: [
+      {
+        ident: "mock_fn",
+        mutability: "Mutable",
+        input: {
+          type: "struct",
+          name: "name",
+          fields: {
+            named: [["arg0", { type: "string" }], ["arg1", { type: "uInt8" }], ["arg2", { type: "uInt16" }]],
+          },
+        },
+        output: {
+          type: "string",
+        },
+        export_name: "export name",
+      },
+      {
+        ident: "mock_fn2",
+        mutability: "Mutable",
+        input: {
+          type: "struct",
+          name: "name",
+          fields: {
+            named: [["arg0", { type: "string" }], ["arg1", { type: "uInt8" }], ["arg2", { type: "uInt16" }]],
+          },
+        },
+        output: {
+          type: "string",
+        },
+        export_name: "export name",
+      }
+    ],
+  },
+};
 
 /**
  * A utility wrapper around the acquireVsCodeApi() function, which enables
@@ -17,6 +112,36 @@ class VSCodeAPIWrapper {
     // context (i.e. VS Code development window or web browser)
     if (typeof acquireVsCodeApi === "function") {
       this.vsCodeApi = acquireVsCodeApi();
+    } else {
+      window.postMessage({
+        type: 'package-selected', payload: {
+          address: 'rdx_simqsyqsyqsyqsyqsyqsyqsyqsyqsyqsyqsyqs',
+          blueprints: [{
+            name: 'blueprint1',
+            abi: mockABI
+          },
+          {
+            name: 'blueprint2',
+            abi: mockABI
+          }]
+        }
+      })
+
+      window.postMessage({
+        type: 'component-loaded',
+        payload: {
+          address: 'rdx_simeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          abi: mockABI
+        }
+      })
+
+      window.postMessage({
+        type: 'component-loaded',
+        payload: {
+          address: 'rdx_simqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq',
+          abi: mockABI2
+        }
+      })
     }
   }
 

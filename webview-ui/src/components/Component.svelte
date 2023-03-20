@@ -1,13 +1,25 @@
 <script lang="ts">
   import type { ComponentT } from "../../../src/types";
+  import { shortenAddress } from "../utils";
   import Function from "./Function.svelte";
 
   export let component: ComponentT;
 </script>
 
-<h3>{component.address}</h3>
-{#each component.abi.abi.fns as fn}
-  {#if fn.mutability === "Mutable"}
-    <Function {fn} />
-  {/if}
-{/each}
+<div>
+  <div class="address">{shortenAddress(component.address)}</div>
+
+  {#each component.abi.abi.fns as fn}
+    {#if fn.mutability === "Mutable"}
+      <Function {fn} />
+    {/if}
+  {/each}
+</div>
+
+<style>
+  .address {
+    font-size: large;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+</style>

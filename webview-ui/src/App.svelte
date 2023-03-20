@@ -1,28 +1,11 @@
 <script lang="ts">
-  import { provideVSCodeDesignSystem, vsCodeButton } from "@vscode/webview-ui-toolkit";
+  import { provideVSCodeDesignSystem, vsCodeButton, vsCodeDropdown } from "@vscode/webview-ui-toolkit";
   import type { BlueprintT, ComponentT, PackageT } from "../../src/types";
   import ActionMenu from "./components/ActionMenu.svelte";
   import Package from "./components/Package.svelte";
   import { postMessageToExtension } from "./utilities/postMessage";
 
-  // In order to use the Webview UI Toolkit web components they
-  // must be registered with the browser (i.e. webview) using the
-  // syntax below.
-  provideVSCodeDesignSystem().register(vsCodeButton());
-
-  // To register more toolkit components, simply import the component
-  // registration function and call it from within the register
-  // function, like so:
-  //
-  // provideVSCodeDesignSystem().register(
-  //   vsCodeButton(),
-  //   vsCodeCheckbox()
-  // );
-  //
-  // Finally, if you would like to register all of the toolkit
-  // components at once, there's a handy convenience function:
-  //
-  // provideVSCodeDesignSystem().register(allComponents.register());
+  [vsCodeButton(), vsCodeDropdown()].forEach((e) => provideVSCodeDesignSystem().register(e));
 
   let _package: PackageT;
   let components: ComponentT[] = [];
@@ -36,7 +19,6 @@
   };
 
   const handlePackageSelected = (payload: PackageT) => {
-    console.log("handlePackageSelected", payload)
     _package = payload;
   };
 
@@ -78,6 +60,11 @@
 </main>
 
 <style>
+  :global(*) {
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+  }
+  
   main {
     display: flex;
     flex-direction: column;
