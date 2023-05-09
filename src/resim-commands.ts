@@ -10,10 +10,12 @@ export const showLedger = () => `resim show-ledger`
 
 export const publishPackage = (dir: string) => `resim publish ${dir}`
 
-export const callFunction = (packageAddress: string, blueprint: string, functionName: string, args: any[]) =>
-    `resim call-function ${packageAddress} ${blueprint} ${functionName} ${args.join(' ')}`
+export const callFunction = (packageAddress: string, blueprint: string, name: string, args: any[]) =>
+    `resim call-function ${packageAddress} ${blueprint} ${name} ${args.join(' ')}`
 
-export const callMethod = (componentAddress: string, method: string, args: any[]) =>
-    `resim call-method ${componentAddress} ${method} ${args.join(' ')}`
+export const callMethod = (componentAddress: string, name: string, args: any[]) =>
+    `resim call-method ${componentAddress} ${name} ${args.join(' ')}`
 
 export const exportABI = (packageAddress: string, blueprint: string) => `resim export-abi ${packageAddress} ${blueprint}`
+
+export const resetLedger = () => `resim reset`

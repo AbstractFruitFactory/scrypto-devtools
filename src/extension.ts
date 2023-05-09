@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     })
   )
 */
-  context.subscriptions.push(vscode.window.registerWebviewViewProvider('main', mainViewProvider))
+  context.subscriptions.push(vscode.window.registerWebviewViewProvider('main', mainViewProvider, { webviewOptions: { retainContextWhenHidden: true } }))
   context.subscriptions.push(vscode.window.registerTreeDataProvider('accounts', accountsTreeViewProvider))
   context.subscriptions.push(vscode.window.registerTreeDataProvider('packages', packagesTreeViewProvider))
 }

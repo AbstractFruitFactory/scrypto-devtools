@@ -138,6 +138,14 @@ class VSCodeAPIWrapper {
       window.postMessage({
         type: 'component-loaded',
         payload: {
+          address: 'rdx_simqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqrrr',
+          abi: mockABI2
+        }
+      })
+
+      window.postMessage({
+        type: 'component-loaded',
+        payload: {
           address: 'rdx_simqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq',
           abi: mockABI2
         }

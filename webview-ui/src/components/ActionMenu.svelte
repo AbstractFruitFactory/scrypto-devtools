@@ -10,11 +10,18 @@
   const sendPublishMessage = () => {
     dispatch("publish-package");
   };
+
+  const sendResetMessage = () => {
+    dispatch("reset");
+  };
 </script>
 
 <div class="menu">
   <vscode-button on:click={sendCreateAccountMessage}>Create account</vscode-button>
   <vscode-button on:click={sendPublishMessage}>Publish new package</vscode-button>
+  <div style:align-self="flex-end">
+    <vscode-button on:click={sendResetMessage}>Reset</vscode-button>
+  </div>
 </div>
 
 <style>

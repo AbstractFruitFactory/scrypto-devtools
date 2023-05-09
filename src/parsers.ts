@@ -13,7 +13,21 @@ export const parseShowAccount = (output: string) => ({
     blueprint: {
         packageAddress: output.substring(output.search('package_address: '), output.search('blueprint_name')).split('package_address:')[1].replace(',', '').replace(' ', '').replace(' ', ''),
         name: output.substring(output.search('blueprint_name: '), output.search('Access Rules')).split('blueprint_name: ')[1].replace(' ', '').split('\"')[1]
-    }
+    },
+    resources: (() => {
+        const resources = output.match(/{ amount: .* }/g)!
+        const parsedResources = resources.map((resource, i) => ({
+            amount: resource.match(/amount: \w*/)![0].split(' ')[1],
+            resourceAddress: resource.match(/resource address: \w*/)![0].split(" ")[2],
+            name: resource.match(/name: "\w*"/)?.[0].split(' ')[1].replace('"', '').replace('"', ''),
+            symbol: resource.match(/symbol: "\w*"/)?.[0].split(' ')[1].replace('"', '').replace('"', ''),
+            nonFungibles: output.substring(output.search(resource), output.search(resources[i + 1])).match(/NonFungible .*}/)?.map(nonFungibleRaw => ({
+                id: nonFungibleRaw.match(/NonFungibleLocalId\(".*"\)/)?.[0].split("\"")[1]!
+            }))
+        }))
+
+        return parsedResources
+    })()
 })
 
 export const parseShowComponent = (output: string) => ({

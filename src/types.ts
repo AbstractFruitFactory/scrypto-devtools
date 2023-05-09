@@ -1,3 +1,5 @@
+import { parseShowAccount } from "./parsers"
+
 export type ABI = {
     package_address: string,
     blueprint_name: string,
@@ -50,5 +52,6 @@ export type AccountT = {
     blueprint: {
         packageAddress: string,
         name: string
-    }
+    },
+    resources: ReturnType<typeof parseShowAccount>['resources']
 }

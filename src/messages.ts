@@ -27,5 +27,20 @@ export type InstantiateBlueprint = _Message<'instantiate-blueprint', {
     blueprint: BlueprintT
 }>
 
-export type MessageFromWebview = CreateAccount | CreateBadge | PublishPackage | InstantiateBlueprint
+export type CallFunction = _Message<'call-function', {
+    packageAddress: string
+    blueprintName: string,
+    fn: string,
+    args: string[]
+}>
+
+export type CallMethod = _Message<'call-method', {
+    componentAddress: string,
+    fn: string,
+    args: string[]
+}>
+
+export type Reset = _Message<'reset', {}>
+
+export type MessageFromWebview = CreateAccount | CreateBadge | PublishPackage | InstantiateBlueprint | CallFunction | CallMethod | Reset
 export type MessageToWebview = AccountCreated

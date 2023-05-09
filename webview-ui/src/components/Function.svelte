@@ -1,8 +1,19 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
   import type { BlueprintT } from "../../../src/types";
   import Accordion from "./Accordion.svelte";
 
+  const dispatch = createEventDispatcher();
+
   export let fn: BlueprintT["abi"]["abi"]["fns"][number];
+
+  const call = () => dispatch("call", { fn: fn.ident, args: inputs });
+
+  const onInput = (e: any, i: number) => {
+    inputs[i] = e.target.value;
+  };
+
+  let inputs: string[] = [];
 </script>
 
 <Accordion>
@@ -10,10 +21,10 @@
     {`${fn.ident}`}
   </div>
   <div class="function">
-    {#each fn.input.fields.named as param}
-      <input class="input" placeholder={param[1].type} />
+    {#each fn.input.fields.named as param, i}
+      <input class="input" placeholder={param[1].type} on:input={(e) => onInput(e, i)} />
     {/each}
-    <vscode-button class="button">Call</vscode-button>
+    <vscode-button on:click={call} on:keypress={() => {}} class="button">Call</vscode-button>
   </div>
 </Accordion>
 

@@ -27,23 +27,21 @@
       <div class="blueprint-dropdown">
         <Dropdown>
           {#each _package.blueprints as blueprint}
-            <option
-              on:click={() => selectBlueprint(blueprint)}
-              value={blueprint.name}
-              on:keydown={() => {}}>{blueprint.name}</option
+            <option on:click={() => selectBlueprint(blueprint)} value={blueprint.name} on:keydown={() => {}}
+              >{blueprint.name}</option
             >
           {/each}
         </Dropdown>
       </div>
 
-      <Blueprint blueprint={selectedBlueprint} />
+      <Blueprint on:callFunction blueprint={selectedBlueprint} />
     </div>
   </div>
   <div>
     <div class="components-title">Components</div>
     <div class="components-content">
       {#each visibleComponents as component}
-        <Component {component} />
+        <Component on:callMethod {component} />
       {/each}
     </div>
   </div>

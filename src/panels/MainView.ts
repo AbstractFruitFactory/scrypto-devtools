@@ -6,13 +6,11 @@ import { Account, AccountsTreeView } from "./AccountsTreeView";
 import { newSimpleBadge, setDefaultAccount } from "../resim-commands";
 import { pipe } from "ramda";
 import { getComponentAddressType } from "../utilities/address-type";
-import { exec_callFunction, exec_createAccount, exec_exportABI, exec_publishPackage, exec_showComponent, exec_showLedger } from "../utilities/actions";
+import { exec_callFunction, exec_callMethod, exec_createAccount, exec_exportABI, exec_publishPackage, exec_resetLedger, exec_showComponent, exec_showLedger } from "../utilities/actions";
 import { store as _store } from '../persistent-state'
-import { Package, PackagesTreeView } from "./PackagesTreeView";
+import { PackagesTreeView } from "./PackagesTreeView";
 import { projectRoot } from "../extension";
 import { findAllRustFiles } from "../utilities/find-files";
-import { getBlueprintName } from "../utilities/rust-file-parsing";
-import * as fs from "fs"
 import { ABI, BlueprintT, PackageT } from "../types";
 import { instantiationFunctionName } from "../utilities/abi";
 
@@ -23,7 +21,7 @@ export class MainView implements vscode.WebviewViewProvider {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly accounts: AccountsTreeView,
-    private readonly project: PackagesTreeView,
+    private readonly packages: PackagesTreeView,
     private readonly store: ReturnType<typeof _store>,
     srcFolderName: string,
   ) {
@@ -36,11 +34,12 @@ export class MainView implements vscode.WebviewViewProvider {
   }
 
   private async loadDataFromLedger() {
-    this.clearData()
+    this._view?.webview.postMessage({ type: 'ledger-loaded' })
+
     const ledger = await exec_showLedger()
 
     for (const _package of ledger.packages) {
-      await this.project.addPackage(_package)
+      await this.packages.addPackage(_package)
     }
 
     for (const component of ledger.components) {
@@ -50,14 +49,11 @@ export class MainView implements vscode.WebviewViewProvider {
         'resource': () => { },
       })[getComponentAddressType(component)]()
     }
-
-    for (const _package of ledger.packages) {
-      await this.project.addPackage(_package)
-    }
   }
 
   private clearData() {
     this.accounts.clear()
+    this.packages.clear()
   }
 
   private async createAccount() {
@@ -74,32 +70,7 @@ export class MainView implements vscode.WebviewViewProvider {
 
   private async publishPackage() {
     const { packageAddress } = await exec_publishPackage(projectRoot)
-
-    const blueprints = (await Promise.all(
-      this.files.map(async file => {
-        const name = getBlueprintName(fs.readFileSync(file, 'utf8'))
-        if (!name) return
-
-        let abi: ABI
-
-        try {
-          abi = await exec_exportABI(packageAddress, name).then(JSON.parse) as ABI
-        } catch {
-          return
-        }
-
-        return { name, abi }
-      })
-    )).filter(blueprint => blueprint !== undefined) as BlueprintT[]
-
-    if (blueprints.length === 0) return
-
-    const _package = {
-      address: packageAddress,
-      blueprints,
-    }
-
-    this._view?.webview.postMessage({ type: 'package-published', payload: _package })
+    this.packages.addPackage(packageAddress)
   }
 
   private async instantiateBlueprint(blueprint: BlueprintT) {
@@ -108,6 +79,22 @@ export class MainView implements vscode.WebviewViewProvider {
 
   private async createBadge() {
     pipe(newSimpleBadge, execShell)()
+  }
+
+  private async callFunction(input: { packageAddress: string, blueprintName: string, fn: string, args: string[] }) {
+    await exec_callFunction(input.packageAddress, input.blueprintName, input.fn, input.args)
+    return this.loadDataFromLedger()
+  }
+
+  private async callMethod(input: { componentAddress: string, fn: string, args: string[] }) {
+    await exec_callMethod(input.componentAddress, input.fn, input.args)
+    return this.loadDataFromLedger()
+  }
+
+  private async reset() {
+    await exec_resetLedger()
+    this.clearData()
+    return this.loadDataFromLedger()
   }
 
   public resolveWebviewView(
@@ -142,6 +129,9 @@ export class MainView implements vscode.WebviewViewProvider {
         case 'create-badge': this.createBadge(); return
         case 'publish-package': this.publishPackage(); return
         case 'instantiate-blueprint': this.instantiateBlueprint(message.content.blueprint); return
+        case 'call-function': this.callFunction(message.content); return
+        case 'call-method': this.callMethod(message.content); return
+        case 'reset': this.reset(); return
       }
     })
   }

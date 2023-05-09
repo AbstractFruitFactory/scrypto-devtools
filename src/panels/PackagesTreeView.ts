@@ -9,7 +9,7 @@ import { store as _store } from '../persistent-state'
 type Element = Package | Blueprint | Function
 
 export class PackagesTreeView implements vscode.TreeDataProvider<Element> {
-    private packages: PackageT[] = []
+    public packages: PackageT[] = []
     private files: string[] = []
 
     private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>()
@@ -23,6 +23,8 @@ export class PackagesTreeView implements vscode.TreeDataProvider<Element> {
     }
 
     public async addPackage(address: string) {
+        if (this.packages.find(_package => _package.address === address)) return
+
         const blueprints = (await Promise.all(
             this.files.map(async file => {
                 const name = getBlueprintName(fs.readFileSync(file, 'utf8'))

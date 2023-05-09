@@ -1,11 +1,9 @@
 import * as vscode from 'vscode';
-import { execShell } from '../utilities/execute-shell';
-import { setDefaultAccount } from '../resim-commands';
 import { AccountT } from '../types';
 import { store as _store } from '../persistent-state'
 import { exec_showAccount } from '../utilities/actions';
 
-type Element = Account | PublicKey | PrivateKey | PublicKeyValue | PrivateKeyValue | Blueprint | BlueprintNameValue | PackageAddressValue
+type Element = Account | PublicKey | PrivateKey | PublicKeyValue | PrivateKeyValue | Resources | Resource | ResourceName | ResourceAmount | ResourceSymbol | ResourceNonFungibles | ResourceNonFungibleId
 
 export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
   private accounts: AccountT[] = []
@@ -27,6 +25,8 @@ export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
   }
 
   public async addAccount(address: string) {
+    if (this.accounts.find(account => account.address === address)) return
+
     const storedKeypair = this.store.account.get(address)
 
     this.accounts.push(
@@ -37,6 +37,7 @@ export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
         publicKey: storedKeypair?.publicKey ?? '<unavailable>'
       }
     )
+    console.log(this.accounts)
     this.refresh()
   }
 
@@ -52,7 +53,7 @@ export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
         return Promise.resolve([
           new PublicKey(element.account.publicKey),
           new PrivateKey(element.account.privateKey),
-          new Blueprint(element.account.blueprint)
+          new Resources(element.account.resources),
         ])
       }
       if (element instanceof PublicKey) {
@@ -65,22 +66,27 @@ export class AccountsTreeView implements vscode.TreeDataProvider<Element> {
           new PrivateKeyValue(element.privKey),
         ])
       }
-      if (element instanceof Blueprint) {
-        return Promise.resolve([
-          new BlueprintName(element.blueprint),
-          new PackageAddress(element.blueprint)
-        ])
+      if (element instanceof Resources) {
+        return Promise.resolve(
+          element.resources.map(resource => new Resource(resource))
+        )
       }
-      if (element instanceof BlueprintName) {
-        return Promise.resolve([
-          new BlueprintNameValue(element.blueprint.name)
-        ])
+      if (element instanceof Resource) {
+        let items: Element[] = []
+
+        if (element.resource.name) items.push(new ResourceName(element.resource.name))
+        if (element.resource.symbol) items.push(new ResourceSymbol(element.resource.symbol))
+        items.push(new ResourceAmount(element.resource.amount))
+        if (element.resource.nonFungibles) items.push(new ResourceNonFungibles(element.resource.nonFungibles.map(nft => nft.id)))
+
+        return Promise.resolve(items)
       }
-      if (element instanceof PackageAddress) {
-        return Promise.resolve([
-          new PackageAddressValue(element.blueprint.packageAddress)
-        ])
+
+      if (element instanceof ResourceNonFungibles) {
+        return Promise.resolve(element.nonFungibles.map(id => new ResourceNonFungibleId(id)))
       }
+
+
     } else {
       for (let account of this.accounts) {
         items.push(new Account(account))
@@ -138,46 +144,63 @@ class PrivateKeyValue extends vscode.TreeItem {
   }
 }
 
-class Blueprint extends vscode.TreeItem {
+class Resources extends vscode.TreeItem {
   constructor(
-    public readonly blueprint: AccountT['blueprint']
+    public readonly resources: AccountT['resources']
   ) {
-    super(`blueprint`, vscode.TreeItemCollapsibleState.Collapsed)
+    super(`resources`, vscode.TreeItemCollapsibleState.Collapsed)
   }
 }
 
-class BlueprintName extends vscode.TreeItem {
+class Resource extends vscode.TreeItem {
+  contextValue = 'resource'
+
   constructor(
-    public readonly blueprint: AccountT['blueprint']
+    public readonly resource: AccountT['resources'][number]
   ) {
-    super(`name`, vscode.TreeItemCollapsibleState.Collapsed);
+    super(`${resource.resourceAddress}`, vscode.TreeItemCollapsibleState.Collapsed)
   }
 }
 
-class PackageAddress extends vscode.TreeItem {
-  constructor(
-    public readonly blueprint: AccountT['blueprint']
-  ) {
-    super(`package_address`, vscode.TreeItemCollapsibleState.Collapsed);
-  }
-}
-
-class BlueprintNameValue extends vscode.TreeItem {
+class ResourceName extends vscode.TreeItem {
   constructor(
     public readonly name: string
   ) {
-    super(`${name}`, vscode.TreeItemCollapsibleState.None);
+    super(`name: ${name}`, vscode.TreeItemCollapsibleState.None)
   }
 }
 
-class PackageAddressValue extends vscode.TreeItem {
+class ResourceAmount extends vscode.TreeItem {
   constructor(
-    public readonly address: string
+    public readonly amount: string
   ) {
-    super(`${address}`, vscode.TreeItemCollapsibleState.None);
+    super(`amount: ${amount}`, vscode.TreeItemCollapsibleState.None)
   }
 }
 
+class ResourceSymbol extends vscode.TreeItem {
+  constructor(
+    public readonly symbol: string
+  ) {
+    super(`symbol: ${symbol}`, vscode.TreeItemCollapsibleState.None)
+  }
+}
+
+class ResourceNonFungibles extends vscode.TreeItem {
+  constructor(
+    public readonly nonFungibles: string[]
+  ) {
+    super(`NonFungibles`, vscode.TreeItemCollapsibleState.Collapsed)
+  }
+}
+
+class ResourceNonFungibleId extends vscode.TreeItem {
+  constructor(
+    public readonly id: string
+  ) {
+    super(`${id}`, vscode.TreeItemCollapsibleState.None)
+  }
+}
 /*
 vscode.commands.registerCommand("setDefaultAccount", (account: Account) => {
   execShell(setDefaultAccount(account.account.address, account.account.privateKey))
